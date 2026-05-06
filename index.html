@@ -397,8 +397,17 @@ if (!SR) {
   rec.interimResults = true;
 
   let active = false;
+  let silentRestarts = 0;
+
+  if (location.protocol === 'file:' && /android|iphone|ipad/i.test(navigator.userAgent)) {
+    const warn = document.createElement('div');
+    warn.className = 'no-speech';
+    warn.innerHTML = 'Loaded as a local file — Android requires HTTPS for voice recognition.<br>Use the chord buttons below, or host this page on GitHub Pages or Netlify.';
+    micBtn.after(warn);
+  }
 
   rec.onresult = ev => {
+    silentRestarts = 0;
     let interim = '', final = '';
     for (let i = ev.resultIndex; i < ev.results.length; i++) {
       const t = ev.results[i][0].transcript;
@@ -426,7 +435,17 @@ if (!SR) {
     setActive(false);
   };
 
-  rec.onend = () => { if (active) rec.start(); };
+  rec.onend = () => {
+    if (!active) return;
+    silentRestarts++;
+    if (silentRestarts >= 3) {
+      silentRestarts = 0;
+      setActive(false);
+      statusEl.innerHTML = 'Voice not working — this page needs HTTPS on Android.<br>Try <a href="https://pages.github.com" style="color:#e07070">GitHub Pages</a> or <a href="https://netlify.com/drop" style="color:#e07070">Netlify Drop</a> to host it.';
+      return;
+    }
+    rec.start();
+  };
 
   function setActive(val) {
     active = val;
