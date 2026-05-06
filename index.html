@@ -246,7 +246,27 @@ const CHORDS = {
   'G7': { frets:[0,0,2,1], fingers:[0,0,2,1], label:'G7'      },
   'D7': { frets:[2,0,3,2], fingers:[1,0,3,2], label:'D7'      },
   'A7': { frets:[0,2,0,3], fingers:[0,1,0,3], label:'A7'      },
-  'E7': { frets:[1,0,2,0], fingers:[1,0,2,0], label:'E7'      },
+  'E7':    { frets:[1,0,2,0], fingers:[1,0,2,0], label:'E7'      },
+  // Additional majors
+  'B':     { frets:[4,4,4,2], fingers:[4,3,2,1], label:'B Major'  },
+  'Bb':    { frets:[3,0,1,1], fingers:[3,0,1,2], label:'Bb Major' },
+  // Additional minors
+  'Bm':    { frets:[4,0,2,2], fingers:[4,0,1,2], label:'B Minor'  },
+  'Gm':    { frets:[0,0,1,3], fingers:[0,0,1,3], label:'G Minor'  },
+  'Cm':    { frets:[0,1,3,3], fingers:[0,1,3,4], label:'C Minor'  },
+  'Fm':    { frets:[1,3,3,1], fingers:[1,2,3,1], label:'F Minor'  },
+  // Additional dominant 7ths
+  'B7':    { frets:[2,1,2,2], fingers:[2,1,3,4], label:'B7'       },
+  'C7':    { frets:[3,2,3,3], fingers:[4,1,2,3], label:'C7'       },
+  'F7':    { frets:[2,1,3,1], fingers:[2,1,3,1], label:'F7'       },
+  // Minor 7th
+  'Bm7':   { frets:[2,0,2,2], fingers:[3,0,1,2], label:'Bm7'      },
+  // Major 7ths
+  'Gmaj7': { frets:[0,0,2,2], fingers:[0,0,1,2], label:'Gmaj7'    },
+  'Dmaj7': { frets:[2,0,4,2], fingers:[2,0,4,1], label:'Dmaj7'    },
+  'Cmaj7': { frets:[4,2,3,0], fingers:[3,1,2,0], label:'Cmaj7'    },
+  'Amaj7': { frets:[2,2,4,4], fingers:[1,2,3,4], label:'Amaj7'    },
+  'Emaj7': { frets:[1,1,2,0], fingers:[1,1,2,0], label:'Emaj7'    },
 };
 
 // ── Speech aliases ──────────────────────────────────────────────────────────
@@ -272,6 +292,32 @@ const ALIASES = {
   'd7':'D7','d 7':'D7','d seven':'D7','dee seven':'D7',
   'a7':'A7','a 7':'A7','a seven':'A7','ay seven':'A7',
   'e7':'E7','e 7':'E7','e seven':'E7',
+  // B major
+  'b':'B','b major':'B','b maj':'B','bee':'B','bee major':'B',
+  // Bb major
+  'bb':'Bb','b flat':'Bb','b flat major':'Bb','bb major':'Bb','bee flat':'Bb','bee flat major':'Bb',
+  // Bm
+  'bm':'Bm','b minor':'Bm','b min':'Bm','b m':'Bm','bee minor':'Bm',
+  // Gm
+  'gm':'Gm','g minor':'Gm','g min':'Gm','g m':'Gm','gee minor':'Gm',
+  // Cm
+  'cm':'Cm','c minor':'Cm','c min':'Cm','c m':'Cm','see minor':'Cm','sea minor':'Cm',
+  // Fm
+  'fm':'Fm','f minor':'Fm','f min':'Fm','f m':'Fm',
+  // B7
+  'b7':'B7','b 7':'B7','b seven':'B7','bee seven':'B7',
+  // C7
+  'c7':'C7','c 7':'C7','c seven':'C7','see seven':'C7','sea seven':'C7',
+  // F7
+  'f7':'F7','f 7':'F7','f seven':'F7',
+  // Bm7
+  'bm7':'Bm7','b minor 7':'Bm7','b minor seven':'Bm7','b m 7':'Bm7','b m seven':'Bm7',
+  // major 7ths
+  'gmaj7':'Gmaj7','g major 7':'Gmaj7','g maj 7':'Gmaj7','g major seven':'Gmaj7','g maj seven':'Gmaj7','gee major seven':'Gmaj7',
+  'dmaj7':'Dmaj7','d major 7':'Dmaj7','d maj 7':'Dmaj7','d major seven':'Dmaj7','d maj seven':'Dmaj7','dee major seven':'Dmaj7',
+  'cmaj7':'Cmaj7','c major 7':'Cmaj7','c maj 7':'Cmaj7','c major seven':'Cmaj7','c maj seven':'Cmaj7','see major seven':'Cmaj7',
+  'amaj7':'Amaj7','a major 7':'Amaj7','a maj 7':'Amaj7','a major seven':'Amaj7','a maj seven':'Amaj7','ay major seven':'Amaj7',
+  'emaj7':'Emaj7','e major 7':'Emaj7','e maj 7':'Emaj7','e major seven':'Emaj7','e maj seven':'Emaj7',
 };
 
 // ── SVG diagram ─────────────────────────────────────────────────────────────
