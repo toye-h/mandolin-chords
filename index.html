@@ -341,6 +341,7 @@ function makeDiagram(key) {
 // ── Chord matching ──────────────────────────────────────────────────────────
 function matchChord(spoken) {
   let t = spoken.toLowerCase().trim()
+    .replace(/[.,!?;:]/g, '')
     .replace(/\b(show me|play|give me|what is|what's|display|the)\b/g, '')
     .replace(/\bchord\b/g, '')
     .replace(/\s+/g, ' ')
@@ -416,12 +417,13 @@ if (!SR) {
     const display = final || interim;
     heardEl.textContent = display ? `"${display}"` : '';
 
-    if (final) {
-      const key = matchChord(final);
+    const text = final || interim;
+    if (text) {
+      const key = matchChord(text);
       if (key) {
         showChord(key);
         statusEl.textContent = 'Found! Keep talking…';
-      } else {
+      } else if (final) {
         statusEl.textContent = 'Chord not recognized — try again';
       }
     }
