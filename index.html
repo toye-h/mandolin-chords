@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandolin Chord Finder</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1a0a00;
+  background-image: radial-gradient(ellipse at top, #2d1500 0%, #1a0a00 70%);
+  min-height: 100vh;
+  color: #f5ece0;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 1rem 0.5rem;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: #f0c060;
+  letter-spacing: 2px;
+  text-shadow: 0 0 30px rgba(240,192,96,0.3);
+}
+
+header p {
+  color: #7a5a3a;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.main {
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ── Mic section ── */
+.mic-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1.2rem 0;
+}
+
+#mic-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 2px solid #f0c060;
+  background: transparent;
+  color: #f0c060;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+#mic-btn:hover { background: rgba(240,192,96,0.1); }
+
+#mic-btn.listening {
+  background: #8b1a1a;
+  border-color: #e74c3c;
+  color: #fff;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.5); }
+  50%      { box-shadow: 0 0 0 18px rgba(231,76,60,0); }
+}
+
+#status {
+  font-size: 0.85rem;
+  color: #7a5a3a;
+  text-align: center;
+  min-height: 1.3em;
+}
+
+#heard {
+  font-size: 1rem;
+  color: #c8a878;
+  min-height: 1.4em;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ── Chord display ── */
+.chord-card {
+  background: #240f00;
+  border: 1px solid #3a1e00;
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 360px;
+  justify-content: center;
+  transition: border-color 0.3s;
+}
+
+.chord-card.empty { border-style: dashed; }
+.chord-card.found { border-color: #f0c060; }
+
+#chord-key {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #f0c060;
+  min-height: 1.2em;
+  line-height: 1;
+}
+
+#chord-label {
+  font-size: 0.95rem;
+  color: #7a5a3a;
+  min-height: 1.3em;
+}
+
+#diagram-wrap { line-height: 0; }
+
+#placeholder-text {
+  color: #4a2a10;
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+/* ── Chord grid ── */
+.grid-section {
+  margin-top: 1.5rem;
+}
+
+.grid-section h2 {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #4a2a10;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+.chord-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.cpill {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #3a1e00;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  color: #a07848;
+  background: #200e00;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+
+.cpill:hover {
+  border-color: #f0c060;
+  color: #f0c060;
+}
+
+.cpill.active {
+  border-color: #f0c060;
+  background: #f0c060;
+  color: #1a0800;
+  font-weight: 700;
+}
+
+/* ── No-speech banner ── */
+.no-speech {
+  background: rgba(180,40,40,0.15);
+  border: 1px solid #8b1a1a;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 0.85rem;
+  color: #e07070;
+  text-align: center;
+  line-height: 1.5;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #3a1e00;
+  font-size: 0.75rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mandolin Chord Finder</h1>
+  <p>Say a chord name to see the fingering</p>
+</header>
+
+<div class="main">
+
+  <div class="mic-section">
+    <button id="mic-btn" title="Start / stop listening">🎙️</button>
+    <div id="status">Click the microphone to start listening</div>
+    <div id="heard"></div>
+  </div>
+
+  <div class="chord-card empty" id="chord-card">
+    <div id="chord-key"></div>
+    <div id="chord-label"></div>
+    <div id="diagram-wrap"></div>
+    <div id="placeholder-text">Say a chord like<br>"G major", "A minor", or "D7"</div>
+  </div>
+
+  <div class="grid-section">
+    <h2>Available chords — tap or say</h2>
+    <div class="chord-grid" id="chord-grid"></div>
+  </div>
+
+</div>
+
+<footer>Uses Web Speech API &bull; Requires Chrome or Edge</footer>
+
+<script>
+// ── Chord data ──────────────────────────────────────────────────────────────
+// frets: [G, D, A, E] string order (low → high), 0 = open
+// fingers: 0 = open, 1–4 = index/middle/ring/pinky
+const CHORDS = {
+  'G':  { frets:[0,0,2,3], fingers:[0,0,1,2], label:'G Major' },
+  'D':  { frets:[2,0,0,2], fingers:[1,0,0,2], label:'D Major' },
+  'A':  { frets:[2,2,2,0], fingers:[1,1,1,0], label:'A Major' },
+  'E':  { frets:[1,2,2,0], fingers:[1,2,3,0], label:'E Major' },
+  'C':  { frets:[0,2,3,0], fingers:[0,1,2,0], label:'C Major' },
+  'F':  { frets:[2,3,3,1], fingers:[2,3,4,1], label:'F Major' },
+  'Am': { frets:[2,2,3,0], fingers:[1,2,3,0], label:'A Minor' },
+  'Em': { frets:[0,2,2,0], fingers:[0,1,2,0], label:'E Minor' },
+  'Dm': { frets:[2,0,0,1], fingers:[2,0,0,1], label:'D Minor' },
+  'G7': { frets:[0,0,2,1], fingers:[0,0,2,1], label:'G7'      },
+  'D7': { frets:[2,0,3,2], fingers:[1,0,3,2], label:'D7'      },
+  'A7': { frets:[0,2,0,3], fingers:[0,1,0,3], label:'A7'      },
+  'E7': { frets:[1,0,2,0], fingers:[1,0,2,0], label:'E7'      },
+};
+
+// ── Speech aliases ──────────────────────────────────────────────────────────
+const ALIASES = {
+  // G
+  'g':'G','g major':'G','g maj':'G','gee':'G','gee major':'G',
+  // D
+  'd':'D','d major':'D','d maj':'D','dee':'D','dee major':'D',
+  // A
+  'a':'A','a major':'A','a maj':'A','ay':'A','ay major':'A',
+  // E
+  'e':'E','e major':'E','e maj':'E',
+  // C
+  'c':'C','c major':'C','c maj':'C','sea':'C','see':'C','sea major':'C','see major':'C',
+  // F
+  'f':'F','f major':'F','f maj':'F',
+  // minors
+  'a minor':'Am','a min':'Am','am':'Am','a m':'Am','ay minor':'Am',
+  'e minor':'Em','e min':'Em','em':'Em','e m':'Em',
+  'd minor':'Dm','d min':'Dm','dm':'Dm','d m':'Dm','dee minor':'Dm',
+  // 7ths
+  'g7':'G7','g 7':'G7','g seven':'G7','gee seven':'G7','g dominant 7':'G7',
+  'd7':'D7','d 7':'D7','d seven':'D7','dee seven':'D7',
+  'a7':'A7','a 7':'A7','a seven':'A7','ay seven':'A7',
+  'e7':'E7','e 7':'E7','e seven':'E7',
+};
+
+// ── SVG diagram ─────────────────────────────────────────────────────────────
+function makeDiagram(key) {
+  const { frets, fingers } = CHORDS[key];
+  const strings = ['G','D','A','E'];
+
+  const W=240, H=300;
+  const pL=52, pT=70;  // left/top padding
+  const sGap=46;       // string spacing
+  const fGap=42;       // fret spacing
+  const nFrets=5;
+  const dotR=13;
+
+  const p = [];
+  p.push(`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`);
+
+  // String name labels and open-string circles
+  for (let s=0; s<4; s++) {
+    const x = pL + s*sGap;
+    p.push(`<text x="${x}" y="${pT-30}" text-anchor="middle" font-size="13" fill="#7a5a3a" font-family="sans-serif">${strings[s]}</text>`);
+    if (frets[s] === 0) {
+      p.push(`<circle cx="${x}" cy="${pT-14}" r="8" fill="none" stroke="#a07848" stroke-width="2"/>`);
+    }
+  }
+
+  // Nut
+  p.push(`<line x1="${pL}" y1="${pT}" x2="${pL+3*sGap}" y2="${pT}" stroke="#f0c060" stroke-width="5" stroke-linecap="round"/>`);
+
+  // Fret lines
+  for (let f=1; f<=nFrets; f++) {
+    const y = pT + f*fGap;
+    p.push(`<line x1="${pL}" y1="${y}" x2="${pL+3*sGap}" y2="${y}" stroke="#3a1e00" stroke-width="1.5"/>`);
+  }
+
+  // String lines
+  for (let s=0; s<4; s++) {
+    const x = pL + s*sGap;
+    p.push(`<line x1="${x}" y1="${pT}" x2="${x}" y2="${pT+nFrets*fGap}" stroke="#5a3010" stroke-width="1.5"/>`);
+  }
+
+  // Fret number labels (left side)
+  for (let f=1; f<=nFrets; f++) {
+    const y = pT + (f-0.5)*fGap + 5;
+    p.push(`<text x="${pL-20}" y="${y}" text-anchor="middle" font-size="11" fill="#4a2a10" font-family="sans-serif">${f}</text>`);
+  }
+
+  // Finger dots with finger number
+  for (let s=0; s<4; s++) {
+    if (frets[s] > 0) {
+      const x = pL + s*sGap;
+      const y = pT + (frets[s]-0.5)*fGap;
+      p.push(`<circle cx="${x}" cy="${y}" r="${dotR}" fill="#f0c060"/>`);
+      if (fingers[s] > 0) {
+        p.push(`<text x="${x}" y="${y+5}" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a0800" font-family="sans-serif">${fingers[s]}</text>`);
+      }
+    }
+  }
+
+  // Finger legend
+  p.push(`<text x="${W/2}" y="${pT+nFrets*fGap+22}" text-anchor="middle" font-size="10" fill="#4a2a10" font-family="sans-serif">1=index  2=middle  3=ring  4=pinky</text>`);
+
+  p.push('</svg>');
+  return p.join('');
+}
+
+// ── Chord matching ──────────────────────────────────────────────────────────
+function matchChord(spoken) {
+  let t = spoken.toLowerCase().trim()
+    .replace(/\b(show me|play|give me|what is|what's|display|the)\b/g, '')
+    .replace(/\bchord\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return ALIASES[t] || null;
+}
+
+// ── Show chord ──────────────────────────────────────────────────────────────
+function showChord(key) {
+  const c = CHORDS[key];
+  document.getElementById('chord-key').textContent   = key;
+  document.getElementById('chord-label').textContent = c.label;
+  document.getElementById('diagram-wrap').innerHTML  = makeDiagram(key);
+  document.getElementById('placeholder-text').style.display = 'none';
+
+  const card = document.getElementById('chord-card');
+  card.classList.remove('empty');
+  card.classList.add('found');
+
+  document.querySelectorAll('.cpill').forEach(p =>
+    p.classList.toggle('active', p.dataset.key === key)
+  );
+}
+
+// ── Build chord grid ────────────────────────────────────────────────────────
+const grid = document.getElementById('chord-grid');
+Object.entries(CHORDS).forEach(([key, c]) => {
+  const btn = document.createElement('button');
+  btn.className = 'cpill';
+  btn.dataset.key = key;
+  btn.textContent = c.label;
+  btn.addEventListener('click', () => showChord(key));
+  grid.appendChild(btn);
+});
+
+// ── Speech recognition ──────────────────────────────────────────────────────
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn  = document.getElementById('mic-btn');
+const statusEl = document.getElementById('status');
+const heardEl  = document.getElementById('heard');
+
+if (!SR) {
+  micBtn.disabled = true;
+  micBtn.style.opacity = '0.3';
+  statusEl.textContent = '';
+  const banner = document.createElement('div');
+  banner.className = 'no-speech';
+  banner.innerHTML = 'Voice recognition not available.<br>Use Chrome or Edge — or tap the chord buttons below.';
+  micBtn.after(banner);
+} else {
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.continuous = true;
+  rec.interimResults = true;
+
+  let active = false;
+
+  rec.onresult = ev => {
+    let interim = '', final = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const t = ev.results[i][0].transcript;
+      ev.results[i].isFinal ? (final += t) : (interim += t);
+    }
+    const display = final || interim;
+    heardEl.textContent = display ? `"${display}"` : '';
+
+    if (final) {
+      const key = matchChord(final);
+      if (key) {
+        showChord(key);
+        statusEl.textContent = 'Found! Keep talking…';
+      } else {
+        statusEl.textContent = 'Chord not recognized — try again';
+      }
+    }
+  };
+
+  rec.onerror = ev => {
+    if (ev.error === 'no-speech') return;
+    statusEl.textContent = ev.error === 'not-allowed'
+      ? 'Microphone access denied — check browser settings'
+      : `Error: ${ev.error}`;
+    setActive(false);
+  };
+
+  rec.onend = () => { if (active) rec.start(); };
+
+  function setActive(val) {
+    active = val;
+    micBtn.classList.toggle('listening', val);
+    micBtn.textContent = val ? '⏹' : '🎙️';
+    statusEl.textContent = val
+      ? 'Listening… say a chord name'
+      : 'Click the microphone to start listening';
+    if (!val) heardEl.textContent = '';
+  }
+
+  micBtn.addEventListener('click', () => {
+    if (active) { active = false; rec.stop(); setActive(false); }
+    else        { setActive(true); rec.start(); }
+  });
+}
+</script>
+</body>
+</html>
